@@ -2,6 +2,7 @@
 const nextConfig = {
   /* config options here */
   reactCompiler: true,
+  transpilePackages: ['swagger-ui-react'],
 };
 
 export default nextConfig;
