@@ -3,9 +3,11 @@
 import { useState, useRef } from "react";
 import axios from "axios";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from") || "/";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +39,7 @@ export default function LoginPage() {
       .post("/api/auth/login", { username, password })
       .then(() => {
         // ✅ FIX: ไม่เก็บ token ใน sessionStorage แล้ว (server ใช้ httpOnly cookie แทน)
-        router.push("/");
+        router.push(from);
       })
       .catch((err) => {
         const status = err.response?.status;
