@@ -1,14 +1,14 @@
 "use client";
 
 import styles from "./styles/home.module.css";
-import Navbar from "./components/navbar/page";
+import Navbar from "@/components/navbar/page";
 
 export default function Home() {
   const handleCreateResume = async () => {
     try {
       const res = await fetch("/api/auth/verify");
       if (res.ok) {
-        window.location.href = "/create/personal-info";
+        window.location.href = "/create/dashboarduser";
       } else {
         window.location.href = "/auth/login";
       }
@@ -36,7 +36,7 @@ export default function Home() {
 
         <div className={styles.buttonGroup}>
           <button className={styles.primaryBtn} onClick={handleCreateResume}>
-            สร้าง ฟรี
+            สร้าง
           </button>
         </div>
       </section>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import styles from "../../styles/navbar.module.css";
+import styles from "@/app/styles/navbar.module.css";
 
 const Navbar = () => {
   const [language, setLanguage] = useState("TH");

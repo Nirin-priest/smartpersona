@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft, FileText, Download, User as UserIcon, Calendar, Eye, Activity } from 'lucide-react';
-import pool from '../../lib/db';
+import pool from '@/lib/db';
 import { notFound } from 'next/navigation';
 import DownloadButton from '../../DownloadButton';
 

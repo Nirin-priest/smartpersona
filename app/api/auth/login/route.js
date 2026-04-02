@@ -17,7 +17,7 @@ export async function POST(request) {
     }
 
     // 3. ดึงข้อมูล User จาก MySQL
-    const sql = "SELECT * FROM users WHERE username = ?";
+    const sql = "SELECT * FROM users WHERE name = ?";
     const users = await query(sql, [username]);
     const user = users[0];
 
@@ -35,13 +35,13 @@ export async function POST(request) {
       );
     }
 
-    // 6. สร้าง JWT Token
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+    // 6. สร้าง JWT Token (เพิ่ม role เข้าไปใน payload)
+    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    // ✅ FIX: เก็บ token ใน httpOnly cookie แทน sessionStorage (ป้องกัน XSS)
-    const response = NextResponse.json({ message: "Success" }, { status: 200 });
+    // ส่ง role กลับไปให้ frontend ใช้ redirect
+    const response = NextResponse.json({ message: "Success", role: user.role }, { status: 200 });
 
     response.cookies.set("token", token, {
       httpOnly: true,

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft, Save } from 'lucide-react';
-import pool from '../../lib/db';
+import pool from '@/lib/db';
 import { updateUser } from '../../actions';
 import { notFound } from 'next/navigation';
 

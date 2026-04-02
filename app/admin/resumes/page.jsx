@@ -1,6 +1,6 @@
-import { Search, FileText, Download, Eye, Trash2, Filter, AlertCircle } from 'lucide-react';
+﻿import { Search, FileText, Download, Eye, Trash2, Filter, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import pool from '../lib/db';
+import pool from '@/lib/db';
 import { deleteResume } from '../actions';
 import DownloadButton from '../DownloadButton';
 import DeleteConfirmForm from '../DeleteConfirmForm';

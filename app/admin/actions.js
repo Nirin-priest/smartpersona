@@ -1,6 +1,6 @@
-'use server';
+﻿'use server';
 
-import pool from './lib/db';
+import pool from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
 // User Actions

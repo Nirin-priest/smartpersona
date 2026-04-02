@@ -16,10 +16,10 @@ export async function POST(request) {
 
     const hashPassword = await bcrypt.hash(password, 10);
     const sql =
-      "INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)";
+      "INSERT INTO users (name, password, role) VALUES (?, ?, ?)";
 
-    // ✅ FIX: hardcode roleId = 2 ที่ server ไม่ให้ client ส่งมาเองได้
-    await query(sql, [username, hashPassword, 2]);
+    // ✅ Map username to name column, use built-in 'User' enum role
+    await query(sql, [username, hashPassword, 'User']);
 
     return NextResponse.json({ message: "Success" }, { status: 200 });
   } catch (error) {

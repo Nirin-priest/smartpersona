@@ -1,6 +1,6 @@
-import { Users, FileText, Activity, TrendingUp, Settings, AlertCircle } from 'lucide-react';
+﻿import { Users, FileText, Activity, TrendingUp, Settings, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import pool from './lib/db';
+import pool from '@/lib/db';
 import DownloadButton from './DownloadButton';
 
 export default async function AdminDashboard() {

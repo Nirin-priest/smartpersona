@@ -11,7 +11,7 @@ export default function CreateResumeHome() {
           คลิกปุ่มด้านล่างเพื่อไปกรอกข้อมูลส่วนตัวก่อน
         </p>
 
-        <Link href="/create/personal-info">
+        <Link href="/create/personalInfo">
           <button className="mt-6 rounded-xl bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300">
             เริ่มต้นกรอกข้อมูล
           </button>

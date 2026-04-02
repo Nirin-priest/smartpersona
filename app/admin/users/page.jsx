@@ -1,6 +1,6 @@
-import { Search, Plus, MoreVertical, Edit2, Trash2, AlertCircle } from 'lucide-react';
+﻿import { Search, Plus, MoreVertical, Edit2, Trash2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import pool from '../lib/db';
+import pool from '@/lib/db';
 import { deleteUser } from '../actions';
 import DeleteConfirmForm from '../DeleteConfirmForm';
 

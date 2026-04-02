@@ -14,12 +14,11 @@ export async function GET(request) {
     // ตรวจสอบ Token
     const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-    // SQL JOIN ตามฟังก์ชัน getRoleNameByUserId
+    // ดึงข้อมูลตาม Schema ใหม่ (ใช้ role โดยตรงจาก users)
     const sql = `
-      SELECT users.id, users.username AS name, roles.name AS role 
+      SELECT id, name, role 
       FROM users 
-      JOIN roles ON users.role_id = roles.id 
-      WHERE users.id = ?`;
+      WHERE id = ?`;
 
     const result = await query(sql, [payload.id]);
 

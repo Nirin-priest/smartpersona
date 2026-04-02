@@ -24,3 +24,20 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@page {
+  margin: 0;
+  size: A4;
+}
+
+@media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* ซ่อน scrollbar และส่วนที่ไม่ต้องการเวลาพิมพ์ */
+  .custom-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
