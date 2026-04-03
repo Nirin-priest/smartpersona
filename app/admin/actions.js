@@ -1,4 +1,4 @@
-﻿'use server';
+'use server';
 
 import pool from '@/lib/db';
 import { revalidatePath } from 'next/cache';
@@ -95,3 +95,57 @@ export async function deleteResume(id) {
     redirect('/admin/resumes?success=Resume+deleted+successfully');
   }
 }
+
+// Settings Actions
+export async function getSettings() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS platform_settings (
+        key_name VARCHAR(50) PRIMARY KEY,
+        value_data TEXT
+      )
+    `);
+    const [rows] = await pool.query('SELECT key_name, value_data FROM platform_settings');
+    const settings = rows.reduce((acc, row) => {
+      acc[row.key_name] = row.value_data;
+      return acc;
+    }, {});
+    return settings;
+  } catch (error) {
+    console.error('Failed to get settings:', error);
+    return {};
+  }
+}
+
+export async function updateSettings(formData) {
+  const platformName = formData.get('platformName');
+  const supportEmail = formData.get('supportEmail');
+  const notifyNewUser = formData.get('notifyNewUser') === 'on' ? 'true' : 'false';
+  const weeklyReport = formData.get('weeklyReport') === 'on' ? 'true' : 'false';
+
+  try {
+    const settingsToSave = [
+      ['platformName', platformName],
+      ['supportEmail', supportEmail],
+      ['notifyNewUser', notifyNewUser],
+      ['weeklyReport', weeklyReport]
+    ];
+
+    for (const [key, val] of settingsToSave) {
+      if (val !== null) {
+        await pool.query(
+          'INSERT INTO platform_settings (key_name, value_data) VALUES (?, ?) ON DUPLICATE KEY UPDATE value_data = ?',
+          [key, val, val]
+        );
+      }
+    }
+  } catch (error) {
+    console.error('Failed to update settings:', error);
+    throw new Error('Failed to save settings');
+  }
+
+  revalidatePath('/admin/settings');
+  revalidatePath('/admin');
+  redirect('/admin/settings?success=Settings+saved+successfully');
+}
+

@@ -1,142 +1,173 @@
+import { ArrowLeft, FileText, User as UserIcon, Calendar, Activity, Download, Trash2, Eye, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import { ArrowLeft, FileText, Download, User as UserIcon, Calendar, Eye, Activity } from 'lucide-react';
 import pool from '@/lib/db';
-import { notFound } from 'next/navigation';
-import DownloadButton from '../../DownloadButton';
+import DeleteConfirmForm from '../../DeleteConfirmForm';
+import { deleteResume } from '../../actions';
 
 export default async function ViewResumePage({ params }) {
   const { id } = await params;
-  
   let resume = null;
-  
+  let content = null;
+  let errorMsg = null;
+
   try {
-    const [rows] = await pool.query(`
-      SELECT r.*, u.name as user_name, u.email as user_email 
-      FROM resumes r 
-      LEFT JOIN users u ON r.user_id = u.id 
-      WHERE r.id = ?
-    `, [id]);
-    
-    if (rows.length === 0) {
-      notFound();
+    // Fetch Resume Metadata + Author
+    const [resumeRows] = await pool.query(
+      `SELECT r.*, u.name as author_name, u.email as author_email 
+       FROM resumes r 
+       LEFT JOIN users u ON r.user_id = u.id 
+       WHERE r.id = ?`,
+      [id]
+    );
+
+    if (resumeRows.length === 0) {
+      errorMsg = 'Resume not found.';
+    } else {
+      resume = resumeRows[0];
+      // Fetch Resume Content (Raw JSON Config)
+      const [contentRows] = await pool.query('SELECT * FROM resume_content WHERE resume_id = ?', [id]);
+      if (contentRows.length > 0) {
+        content = contentRows[0];
+      }
     }
-    resume = rows[0];
-  } catch (error) {
-    console.error('Failed to fetch resume:', error);
-    resume = { 
-      id, title: 'Demo Resume', template: 'Modern UX', status: 'Published', 
-      views: 120, downloads: 45, created_at: new Date().toISOString(),
-      user_name: 'Demo User', user_email: 'demo@example.com'
-    };
+  } catch (err) {
+    errorMsg = 'Failed to load resume details: ' + err.message;
+  }
+
+  if (errorMsg && !resume) {
+    return (
+      <div className="p-6 bg-red-50 text-red-700 rounded-lg flex items-center gap-3 border border-red-200">
+        <AlertCircle size={20} />
+        {errorMsg}
+        <Link href="/admin/resumes" className="ml-auto underline font-medium">Return to Resumes</Link>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
-          <Link href="/admin/resumes" className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500">
-            <ArrowLeft size={20} />
+          <Link href="/admin/resumes" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <ArrowLeft size={20} className="text-gray-600" />
           </Link>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Resume Details</h2>
+            <h2 className="text-2xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
+              <FileText className="text-blue-500" /> 
+              Resume: {resume.title}
+            </h2>
             <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-              <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">{resume.id}</span>
+              <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 border border-gray-200">{resume.id}</span>
               <span>&bull;</span>
-              <span>{resume.template} Template</span>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                resume.status === 'Published' ? 'bg-green-100 text-green-700' : 
+                resume.status === 'Draft' ? 'bg-gray-100 text-gray-700' : 'bg-orange-100 text-orange-700'
+              }`}>
+                {resume.status}
+              </span>
             </div>
           </div>
         </div>
         
-        <div className="flex gap-2">
-           <DownloadButton className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors cursor-pointer flex items-center gap-2" message={"Generating and downloading PDF...\n\n(Mock feature)"}>
-            <Download size={18} />
-             Download PDF
-           </DownloadButton>
+        <div className="flex items-center gap-2">
+          {/* Quick Stats Toolbar */}
+          <div className="flex bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden mr-2">
+            <div className="px-4 py-2 border-r border-gray-200 flex flex-col items-center justify-center">
+              <span className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5"><Eye size={12} className="inline mr-1" />Views</span>
+              <span className="text-lg font-bold text-gray-800">{resume.views}</span>
+            </div>
+            <div className="px-4 py-2 flex flex-col items-center justify-center">
+              <span className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5"><Download size={12} className="inline mr-1" />Downloads</span>
+              <span className="text-lg font-bold text-gray-800">{resume.downloads}</span>
+            </div>
+          </div>
+
+          <DeleteConfirmForm action={deleteResume.bind(null, resume.id)} itemName={`resume "${resume.title}"`}>
+            <button type="submit" className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg font-medium shadow-sm transition-colors cursor-pointer flex items-center gap-2">
+              <Trash2 size={16} />
+              Delete Document
+            </button>
+          </DeleteConfirmForm>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Info */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* Info Sidebar */}
+        <div className="space-y-6">
+          {/* Author Card */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
-                <FileText size={24} />
+            <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-4 border-b pb-2 flex items-center gap-2">
+              <UserIcon size={16} className="text-gray-400" /> Author Details
+            </h3>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-linear-to-br from-indigo-100 to-blue-200 flex items-center justify-center text-indigo-700 font-bold text-lg">
+                {(resume.author_name || '?').charAt(0)}
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-800">{resume.title}</h3>
-                <span className={`inline-flex items-center mt-2 px-2.5 py-1 rounded-full text-xs font-medium ${
-                  resume.status.toLowerCase() === 'published' ? 'bg-green-100 text-green-700' : 
-                  resume.status.toLowerCase() === 'draft' ? 'bg-gray-100 text-gray-700' : 'bg-orange-100 text-orange-700'
-                }`}>
-                  {resume.status}
-                </span>
+              <div className="overflow-hidden">
+                <p className="font-semibold text-gray-800 truncate" title={resume.author_name}>{resume.author_name || 'Unknown User'}</p>
+                <p className="text-sm text-gray-500 truncate" title={resume.author_email}>{resume.author_email || 'No email provided'}</p>
+                <Link href={`/admin/users/${resume.user_id}`} className="text-xs text-blue-600 hover:text-blue-800 underline mt-1 inline-block">
+                  View Author Profile
+                </Link>
               </div>
             </div>
-            
-            <div className="mt-8 pt-6 border-t border-gray-100">
-              <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Content Preview</h4>
-              <div className="aspect-[1/1.4] bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
-                 <div className="absolute inset-x-0 inset-y-0 opacity-10 flex flex-col items-center justify-center p-8 text-center text-gray-600">
-                   <FileText size={80} className="mb-4" />
-                   <p className="text-lg">Web Editor Canvas Mockup</p>
-                 </div>
+          </div>
+
+          {/* Meta Card */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-4 border-b pb-2 flex items-center gap-2">
+              <Activity size={16} className="text-gray-400" /> Document Info
+            </h3>
+            <div className="space-y-4 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500 flex items-center gap-2"><FileText size={14} /> Template</span>
+                <span className="font-medium text-gray-800 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">{resume.template}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500 flex items-center gap-2"><Calendar size={14} /> Created</span>
+                <span className="font-medium text-gray-800">{new Date(resume.created_at).toLocaleDateString()}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Sidebar Info */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Author Details</h4>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-gray-50 text-gray-500 rounded-lg">
-                <UserIcon size={20} />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-800">{resume.user_name || 'Unknown'}</p>
-                <p className="text-sm text-gray-500">{resume.user_email || 'No email'}</p>
-              </div>
-            </div>
-            <Link href="/admin/users" className="text-sm text-blue-600 hover:text-blue-700 font-medium">View User Profile &rarr;</Link>
+        {/* JSON Content View */}
+        <div className="lg:col-span-2 bg-slate-900 rounded-xl shadow-sm border border-slate-800 overflow-hidden flex flex-col">
+          <div className="px-4 py-3 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+            <h3 className="text-sm font-medium text-slate-200 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+              Raw JSON Configuration
+            </h3>
+            <span className="text-xs text-slate-400 font-mono">read-only</span>
           </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Performance Stats</h4>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Eye size={16} />
-                  <span className="text-sm">Total Views</span>
-                </div>
-                <span className="font-semibold text-gray-800">{resume.views}</span>
+          <div className="p-4 overflow-auto max-h-[600px] text-xs font-mono text-slate-300">
+            {content ? (
+              <pre className="whitespace-pre-wrap wrap-break-word">
+                {JSON.stringify(
+                  (() => {
+                    const safeParse = (val) => {
+                      if (!val) return {};
+                      if (typeof val === 'object') return val;
+                      try { return JSON.parse(val); } catch { return {}; }
+                    };
+                    return {
+                      config: safeParse(content.config),
+                      personal: safeParse(content.personal),
+                      education: safeParse(content.education),
+                      experience: safeParse(content.experience),
+                      summary: safeParse(content.summary),
+                      skills: safeParse(content.skills),
+                    };
+                  })(),
+                  null,
+                  2
+                )}
+              </pre>
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-500 italic py-12">
+                No content blocks found for this resume.
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Download size={16} />
-                  <span className="text-sm">Total Downloads</span>
-                </div>
-                <span className="font-semibold text-gray-800">{resume.downloads}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Activity size={16} />
-                  <span className="text-sm">Conversion Rate</span>
-                </div>
-                <span className="font-semibold text-green-600">
-                  {resume.views > 0 ? Math.round((resume.downloads / resume.views) * 100) : 0}%
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Metadata</h4>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Calendar size={16} />
-              <span className="text-sm">Created: {new Date(resume.created_at).toLocaleDateString()}</span>
-            </div>
+            )}
           </div>
         </div>
       </div>

@@ -17,9 +17,9 @@ services:
        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: smartpersona_db
 #      MYSQL_USER: user
 #      MYSQL_PASSWORD: user
-#      MYSQL_DATABASE: data
     networks:
       - mysql-network
       
