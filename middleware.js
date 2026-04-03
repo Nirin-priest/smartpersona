@@ -29,16 +29,24 @@ export async function middleware(request) {
 
   const userData = await verifyRes.json();
 
-  // 3. Admin Route Protection: Must have 'admin' role
+  // 3. Admin Route Protection: Must have 'Admin' role
   if (pathname.startsWith("/admin")) {
-    if (userData.role !== "admin") {
+    if (userData.role !== "Admin") {
       // Redirect regular users to their dashboard if they try to access /admin
       const dashboardUrl = new URL("/create/dashboarduser", request.url);
       return NextResponse.redirect(dashboardUrl);
     }
   }
 
-  // 4. Create Route Protection: Just need a valid token (already checked above)
+  // 4. Create Route Protection: Admin can't access user side
+  if (pathname.startsWith("/create")) {
+    if (userData.role === "Admin") {
+      // Redirect Admins to the admin area if they try to access /create
+      const adminUrl = new URL("/admin", request.url);
+      return NextResponse.redirect(adminUrl);
+    }
+  }
+
   return NextResponse.next();
 }
 

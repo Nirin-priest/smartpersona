@@ -8,7 +8,13 @@ export default function Home() {
     try {
       const res = await fetch("/api/auth/verify");
       if (res.ok) {
-        window.location.href = "/create/dashboarduser";
+        const userData = await res.json();
+        // ถ้าเป็นแอดมิน ให้ไปหน้าแอดมินโดยตรง
+        if (userData.role === "Admin") {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = "/create/dashboarduser";
+        }
       } else {
         window.location.href = "/auth/login";
       }

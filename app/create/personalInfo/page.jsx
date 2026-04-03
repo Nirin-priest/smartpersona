@@ -1,3 +1,4 @@
+"use client";
 import { useRef, useState, useEffect } from "react";
 import { useReactToPrint } from "react-to-print";
 import Link from "next/link";
