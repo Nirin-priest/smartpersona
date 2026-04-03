@@ -55,10 +55,10 @@ export default async function EditUserPage({ params }) {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Full Name *</label>
+                <label className="text-sm font-medium text-gray-700">Username *</label>
                 <input 
                   type="text" 
-                  name="name"
+                  name="username"
                   defaultValue={user.name}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm" 
                   required
@@ -66,13 +66,22 @@ export default async function EditUserPage({ params }) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Email Address *</label>
+                <label className="text-sm font-medium text-gray-700">New Password (Leave blank to keep current)</label>
+                <input 
+                  type="password" 
+                  name="password"
+                  placeholder="Enter new password"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm" 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Email Address (Optional)</label>
                 <input 
                   type="email" 
                   name="email"
                   defaultValue={user.email}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm" 
-                  required
                 />
               </div>
 

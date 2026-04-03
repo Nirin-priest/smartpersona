@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // เข้าถึงเฉพาะเส้นทางสร้าง resume
-  if (!pathname.startsWith("/create")) {
+  // 1. Only apply to /admin and /create
+  if (!pathname.startsWith("/admin") && !pathname.startsWith("/create")) {
     return NextResponse.next();
   }
 
@@ -15,21 +15,33 @@ export async function middleware(request) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // ตรวจสอบ Token ผ่าน API `/api/auth/verify`
+  // 2. Verify Token and Role via API `/api/auth/verify`
   const verifyUrl = new URL("/api/auth/verify", request.url);
   const verifyRes = await fetch(verifyUrl.toString(), {
     headers: { cookie },
   });
 
-  if (verifyRes.ok) {
-    return NextResponse.next();
+  if (!verifyRes.ok) {
+    const loginUrl = new URL("/auth/login", request.url);
+    loginUrl.searchParams.set("from", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  const loginUrl = new URL("/auth/login", request.url);
-  loginUrl.searchParams.set("from", pathname);
-  return NextResponse.redirect(loginUrl);
+  const userData = await verifyRes.json();
+
+  // 3. Admin Route Protection: Must have 'admin' role
+  if (pathname.startsWith("/admin")) {
+    if (userData.role !== "admin") {
+      // Redirect regular users to their dashboard if they try to access /admin
+      const dashboardUrl = new URL("/create/dashboarduser", request.url);
+      return NextResponse.redirect(dashboardUrl);
+    }
+  }
+
+  // 4. Create Route Protection: Just need a valid token (already checked above)
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/create/:path*"],
+  matcher: ["/admin/:path*", "/create/:path*"],
 };

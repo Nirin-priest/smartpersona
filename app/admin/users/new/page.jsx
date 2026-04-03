@@ -25,24 +25,34 @@ export default function NewUserPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Full Name *</label>
+                <label className="text-sm font-medium text-gray-700">Username *</label>
                 <input 
                   type="text" 
-                  name="name"
-                  placeholder="e.g. John Doe"
+                  name="username"
+                  placeholder="e.g. johndoe"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm" 
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Email Address *</label>
+                <label className="text-sm font-medium text-gray-700">Password *</label>
+                <input 
+                  type="password" 
+                  name="password"
+                  placeholder="Create a password"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm" 
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Email Address (Optional)</label>
                 <input 
                   type="email" 
                   name="email"
                   placeholder="e.g. john@example.com"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm" 
-                  required
                 />
               </div>
 

@@ -3,6 +3,9 @@ import Link from 'next/link';
 import pool from '@/lib/db';
 import DeleteConfirmForm from '../../DeleteConfirmForm';
 import { deleteResume } from '../../actions';
+import ResumeDetailClient from './ResumeDetailClient';
+
+import { Suspense } from 'react';
 
 export default async function ViewResumePage({ params }) {
   const { id } = await params;
@@ -131,45 +134,25 @@ export default async function ViewResumePage({ params }) {
           </div>
         </div>
 
-        {/* JSON Content View */}
-        <div className="lg:col-span-2 bg-slate-900 rounded-xl shadow-sm border border-slate-800 overflow-hidden flex flex-col">
-          <div className="px-4 py-3 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
-            <h3 className="text-sm font-medium text-slate-200 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-              Raw JSON Configuration
-            </h3>
-            <span className="text-xs text-slate-400 font-mono">read-only</span>
-          </div>
-          <div className="p-4 overflow-auto max-h-[600px] text-xs font-mono text-slate-300">
-            {content ? (
-              <pre className="whitespace-pre-wrap wrap-break-word">
-                {JSON.stringify(
-                  (() => {
-                    const safeParse = (val) => {
-                      if (!val) return {};
-                      if (typeof val === 'object') return val;
-                      try { return JSON.parse(val); } catch { return {}; }
-                    };
-                    return {
-                      config: safeParse(content.config),
-                      personal: safeParse(content.personal),
-                      education: safeParse(content.education),
-                      experience: safeParse(content.experience),
-                      summary: safeParse(content.summary),
-                      skills: safeParse(content.skills),
-                    };
-                  })(),
-                  null,
-                  2
-                )}
-              </pre>
-            ) : (
-              <div className="flex items-center justify-center h-full text-slate-500 italic py-12">
-                No content blocks found for this resume.
-              </div>
-            )}
-          </div>
-        </div>
+        <Suspense fallback={<div className="lg:col-span-2 bg-gray-50 flex items-center justify-center min-h-[400px] border border-gray-100 rounded-xl animate-pulse text-gray-400">Loading Preview...</div>}>
+          <ResumeDetailClient 
+              resumeData={(() => {
+                const safeParse = (val) => {
+                  if (!val) return {};
+                  if (typeof val === 'object') return val;
+                  try { return JSON.parse(val); } catch { return {}; }
+                };
+                return {
+                  config: safeParse(content?.config),
+                  personal: safeParse(content?.personal),
+                  education: safeParse(content?.education),
+                  experience: safeParse(content?.experience),
+                  summary: safeParse(content?.summary),
+                  skills: safeParse(content?.skills),
+                };
+              })()} 
+          />
+        </Suspense>
       </div>
     </div>
   );

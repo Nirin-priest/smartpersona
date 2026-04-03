@@ -208,13 +208,13 @@ export default async function ResumesManagementPage({ searchParams }) {
                       >
                         <Eye size={16} />
                       </Link>
-                      <DownloadButton
+                      <Link
+                        href={`/admin/resumes/${resume.id}?print=true`}
                         className="p-1.5 bg-green-50 text-green-600 rounded hover:bg-green-100 transition-colors flex items-center justify-center cursor-pointer"
                         title="Download PDF"
-                        message={'Generating PDF...\n\n(Feature coming soon)'}
                       >
                         <Download size={16} />
-                      </DownloadButton>
+                      </Link>
                       <DeleteConfirmForm action={deleteResume.bind(null, resume.id)} itemName={`resume "${resume.title}"`}>
                         <button
                           type="submit"

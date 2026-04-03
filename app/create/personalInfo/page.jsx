@@ -1,20 +1,33 @@
-"use client";
-
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useReactToPrint } from "react-to-print";
 import Link from "next/link";
 import { useResume } from "../ResumeContext"; 
 import ResumePreview from "../ResumePreview";
+import { incrementResumeView, incrementResumeDownload } from "@/app/admin/actions";
 
 export default function ResumeBuilder() {
   const { data, updateData, resumeId, setResumeId } = useResume(); 
   const resumeRef = useRef(null);
   const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | saved | error
 
-  const handlePrint = useReactToPrint({
+  const handlePrintTrigger = useReactToPrint({
     contentRef: resumeRef, 
     documentTitle: data.personal?.firstName ? `${data.personal.firstName}_Resume` : "My_Resume",
   });
+
+  const handlePrint = async () => {
+    handlePrintTrigger();
+    if (resumeId) {
+      await incrementResumeDownload(resumeId);
+    }
+  };
+
+  // ✅ Increment view count when opening the resume
+  useEffect(() => {
+    if (resumeId) {
+      incrementResumeView(resumeId);
+    }
+  }, [resumeId]);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];

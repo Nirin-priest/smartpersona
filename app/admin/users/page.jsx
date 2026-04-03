@@ -159,7 +159,7 @@ export default async function UsersManagementPage({ searchParams }) {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-white border-b border-gray-100">
-                <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name/Email</th>
+                <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Username</th>
                 <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
                 <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="py-4 px-6 text-xs font-semibold text-gray-500 uppercase tracking-wider">Resumes</th>
@@ -177,7 +177,7 @@ export default async function UsersManagementPage({ searchParams }) {
                       </div>
                       <div>
                         <p className="font-semibold text-gray-800">{user.name}</p>
-                        <p className="text-sm text-gray-500">{user.email}</p>
+                        {user.email && <p className="text-xs text-gray-400">{user.email}</p>}
                       </div>
                     </div>
                   </td>
