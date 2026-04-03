@@ -4,7 +4,7 @@ export async function GET() {
   try {
     const [rows] = await pool.query('SELECT id, name, email, role, status, created_at FROM users ORDER BY created_at DESC');
     
-    // Create CSV Header
+    // Create CSV
     let csvData = 'ID,Name,Email,Role,Status,Created At\n';
     
     // Append Rows
