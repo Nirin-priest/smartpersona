@@ -1,9 +1,11 @@
 import { Search, FileText, Download, Eye, Trash2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import pool from '@/lib/db';
-import { deleteResume } from '../actions';
-import DownloadButton from '../DownloadButton';
-import DeleteConfirmForm from '../DeleteConfirmForm';
+import { deleteResume } from '@/app/actions/adminActions';
+import DownloadButton from '@/components/admin/DownloadButton';
+import DeleteConfirmForm from '@/components/admin/DeleteConfirmForm';
+
+export const dynamic = 'force-dynamic';
 
 export default async function ResumesManagementPage({ searchParams }) {
   const params = await searchParams;

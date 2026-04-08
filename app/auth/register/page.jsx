@@ -27,17 +27,16 @@ export default function RegisterPage() {
     return e;
   };
 
-  const registerClick = () => {
-    const e = validateRegister();
-    if (Object.keys(e).length > 0) {
-      setErrors(e);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const e_val = validateRegister();
+    if (Object.keys(e_val).length > 0) {
+      setErrors(e_val);
       return;
     }
     setErrors({});
     setIsLoading(true);
 
-    // ✅ FIX: ยิงไป Next.js API route แทน localhost โดยตรง
-    // ✅ FIX: ไม่ส่ง roleId จาก client (ให้ server กำหนดเอง)
     axios
       .post("/api/users/register", { username, password })
       .then(() => {
@@ -66,81 +65,89 @@ export default function RegisterPage() {
           </div>
         )}
 
-        <div className="mb-5">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => {
-              setUsername(e.target.value);
-              setErrors((prev) => ({ ...prev, username: "" }));
-            }}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+            <input
+              type="text"
+              name="username"
+              autoComplete="username"
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                setErrors((prev) => ({ ...prev, username: "" }));
+              }}
+              disabled={isLoading}
+              placeholder="Choose a username"
+              className={`w-full px-4 py-3 rounded-lg border ${errors.username ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0066cc]'} focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200`}
+            />
+            {errors.username && <p className="text-red-500 text-sm mt-1.5">{errors.username}</p>}
+          </div>
+
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setErrors((prev) => ({ ...prev, password: "" }));
+                }}
+                disabled={isLoading}
+                placeholder="Create a password"
+                className={`w-full px-4 py-3 rounded-lg border ${errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0066cc]'} focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 pr-16`}
+              />
+              <button 
+                type="button" 
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#0066cc] hover:text-[#0052a3] transition-colors"
+              >
+                {showPassword ? "HIDE" : "SHOW"}
+              </button>
+            </div>
+            {errors.password && <p className="text-red-500 text-sm mt-1.5">{errors.password}</p>}
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+                }}
+                disabled={isLoading}
+                placeholder="Confirm your password"
+                className={`w-full px-4 py-3 rounded-lg border ${errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0066cc]'} focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 pr-16`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#0066cc] hover:text-[#0052a3] transition-colors"
+              >
+                {showConfirmPassword ? "HIDE" : "SHOW"}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm mt-1.5">{errors.confirmPassword}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
             disabled={isLoading}
-            placeholder="Choose a username"
-            className={`w-full px-4 py-3 rounded-lg border ${errors.username ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0066cc]'} focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200`}
-          />
-          {errors.username && <p className="text-red-500 text-sm mt-1.5">{errors.username}</p>}
-        </div>
-
-        <div className="mb-5">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setErrors((prev) => ({ ...prev, password: "" }));
-              }}
-              disabled={isLoading}
-              placeholder="Create a password"
-              className={`w-full px-4 py-3 rounded-lg border ${errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0066cc]'} focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 pr-16`}
-            />
-            <button 
-              type="button" 
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#0066cc] hover:text-[#0052a3] transition-colors"
-            >
-              {showPassword ? "HIDE" : "SHOW"}
-            </button>
-          </div>
-          {errors.password && <p className="text-red-500 text-sm mt-1.5">{errors.password}</p>}
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
-          <div className="relative">
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                setErrors((prev) => ({ ...prev, confirmPassword: "" }));
-              }}
-              disabled={isLoading}
-              placeholder="Confirm your password"
-              className={`w-full px-4 py-3 rounded-lg border ${errors.confirmPassword ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0066cc]'} focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 pr-16`}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#0066cc] hover:text-[#0052a3] transition-colors"
-            >
-              {showConfirmPassword ? "HIDE" : "SHOW"}
-            </button>
-          </div>
-          {errors.confirmPassword && (
-            <p className="text-red-500 text-sm mt-1.5">{errors.confirmPassword}</p>
-          )}
-        </div>
-
-        <button
-          onClick={registerClick}
-          disabled={isLoading}
-          className="w-full bg-linear-to-br from-[#0066cc] to-[#0052a3] text-white font-bold py-3.5 px-4 rounded-lg shadow-[0_4px_15px_rgba(0,102,204,0.4)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,102,204,0.5)] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none mt-2"
-        >
-          {isLoading ? "Please wait..." : "Sign Up"}
-        </button>
+            className="w-full bg-linear-to-br from-[#0066cc] to-[#0052a3] text-white font-bold py-3.5 px-4 rounded-lg shadow-[0_4px_15px_rgba(0,102,204,0.4)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,102,204,0.5)] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none mt-2"
+          >
+            {isLoading ? "Please wait..." : "Sign Up"}
+          </button>
+        </form>
 
         <div className="mt-8 text-center text-sm text-gray-600">
           {"Already have an account? "}

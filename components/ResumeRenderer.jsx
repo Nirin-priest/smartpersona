@@ -27,6 +27,7 @@ export default function ResumeRenderer({ data }) {
           
           {personal.profilePic && (
             <div className="flex justify-center mb-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
                 src={personal.profilePic} 
                 alt="Profile" 
@@ -94,6 +95,7 @@ export default function ResumeRenderer({ data }) {
       <div className="w-1/3 bg-blue-900 text-white p-8">
         <div className="flex flex-col items-center mb-8">
           {personal.profilePic ? (
+             // eslint-disable-next-line @next/next/no-img-element
              <img src={personal.profilePic} alt="Profile" className="w-32 h-32 rounded-full object-cover border-4 border-white mb-4 shadow-lg" />
           ) : (
              <div className="w-32 h-32 rounded-full bg-blue-800 border-4 border-white mb-4 flex items-center justify-center text-sm">รูปโปรไฟล์</div>

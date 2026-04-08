@@ -13,7 +13,7 @@ export async function incrementResumeView(id) {
   try {
     const user = await getCurrentUser();
     // Real Usage Logic: Only increment if NOT an admin
-    if (user?.role === 'admin') return { success: false, reason: 'admin_ignore' };
+    if (user?.role?.toLowerCase() === 'admin') return { success: false, reason: 'admin_ignore' };
 
     await pool.query('UPDATE resumes SET views = views + 1 WHERE id = ?', [id]);
     revalidatePath('/admin/resumes');
@@ -28,7 +28,7 @@ export async function incrementResumeDownload(id) {
   try {
     const user = await getCurrentUser();
     // Real Usage Logic: Only increment if NOT an admin
-    if (user?.role === 'admin') return { success: false, reason: 'admin_ignore' };
+    if (user?.role?.toLowerCase() === 'admin') return { success: false, reason: 'admin_ignore' };
 
     await pool.query('UPDATE resumes SET downloads = downloads + 1 WHERE id = ?', [id]);
     revalidatePath('/admin/resumes');
@@ -40,6 +40,9 @@ export async function incrementResumeDownload(id) {
 }
 
 export async function createUser(formData) {
+  const currentUser = await getCurrentUser();
+  if (currentUser?.role?.toLowerCase() !== 'admin') throw new Error('Unauthorized');
+
   const name = formData.get('username');
   const email = formData.get('email');
   const password = formData.get('password');
@@ -63,6 +66,9 @@ export async function createUser(formData) {
 }
 
 export async function updateUser(id, formData) {
+  const currentUser = await getCurrentUser();
+  if (currentUser?.role?.toLowerCase() !== 'admin') throw new Error('Unauthorized');
+
   const name = formData.get('username');
   const email = formData.get('email');
   const password = formData.get('password');
@@ -93,6 +99,9 @@ export async function updateUser(id, formData) {
 }
 
 export async function deleteUser(id) {
+  const currentUser = await getCurrentUser();
+  if (currentUser?.role?.toLowerCase() !== 'admin') throw new Error('Unauthorized');
+
   let isSuccess = false;
   try {
     await pool.query('DELETE FROM users WHERE id = ?', [id]);
@@ -109,6 +118,9 @@ export async function deleteUser(id) {
 }
 
 export async function updateUserStatus(id, newStatus) {
+  const currentUser = await getCurrentUser();
+  if (currentUser?.role?.toLowerCase() !== 'admin') throw new Error('Unauthorized');
+
   let isSuccess = false;
   try {
     await pool.query('UPDATE users SET status = ? WHERE id = ?', [newStatus, id]);
@@ -125,6 +137,9 @@ export async function updateUserStatus(id, newStatus) {
 
 // Resume Actions
 export async function deleteResume(id) {
+  const currentUser = await getCurrentUser();
+  if (currentUser?.role?.toLowerCase() !== 'admin') throw new Error('Unauthorized');
+
   let isSuccess = false;
   try {
     await pool.query('DELETE FROM resumes WHERE id = ?', [id]);
@@ -142,6 +157,9 @@ export async function deleteResume(id) {
 
 // Settings Actions
 export async function getSettings() {
+  const currentUser = await getCurrentUser();
+  if (currentUser?.role?.toLowerCase() !== 'admin') return {};
+
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS platform_settings (
@@ -162,6 +180,9 @@ export async function getSettings() {
 }
 
 export async function updateSettings(formData) {
+  const currentUser = await getCurrentUser();
+  if (currentUser?.role?.toLowerCase() !== 'admin') throw new Error('Unauthorized');
+
   const platformName = formData.get('platformName');
   const supportEmail = formData.get('supportEmail');
   const notifyNewUser = formData.get('notifyNewUser') === 'on' ? 'true' : 'false';

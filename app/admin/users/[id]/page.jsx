@@ -1,7 +1,7 @@
 import { ArrowLeft, Save, User as UserIcon, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import pool from '@/lib/db';
-import { updateUser } from '../../actions';
+import { updateUser } from '@/app/actions/adminActions';
 
 export default async function EditUserPage({ params }) {
   const { id } = await params;

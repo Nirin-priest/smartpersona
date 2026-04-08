@@ -24,7 +24,7 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
-    const { resumeId, data } = body; // data คือ object จาก ResumeContext
+    const { resumeId, data } = body; // data is the context object
 
     const { config, personal, education, experience, summary, skills } = data;
     const template = config?.template || "classic";

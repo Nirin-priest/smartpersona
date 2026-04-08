@@ -1,6 +1,8 @@
 import { Save, Bell, Shield, Key } from 'lucide-react';
-import { getSettings, updateSettings } from '../actions';
+import { getSettings, updateSettings } from '@/app/actions/adminActions';
 import Link from 'next/link';
+
+export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage({ searchParams }) {
   const params = await searchParams;

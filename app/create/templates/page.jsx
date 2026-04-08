@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useResume } from "../ResumeContext";
+import { useResume } from "@/contexts/ResumeContext";
 
 export default function TemplatesPage() {
   const router = useRouter();
