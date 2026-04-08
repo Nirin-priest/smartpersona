@@ -7,10 +7,35 @@ import ResumePreview from "@/components/create/ResumePreview";
 import { incrementResumeView, incrementResumeDownload } from "@/app/actions/adminActions";
 
 export default function ResumeBuilder() {
-  const { data, updateData, resumeId, setResumeId } = useResume();
+  const { data, updateData, setInitialData, resumeId, setResumeId } = useResume();
   const resumeRef = useRef(null);
   const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | saved | error
   const [uploadStatus, setUploadStatus] = useState('idle'); // idle | uploading | done | error
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // โหลดข้อมูลเก่าถ้ามีการส่ง resumeId มาใน URL
+  useEffect(() => {
+    const fetchResume = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const urlResumeId = params.get("resumeId");
+      
+      if (urlResumeId && urlResumeId !== resumeId) {
+        try {
+          const res = await fetch(`/api/resume/load?id=${urlResumeId}`);
+          if (res.ok) {
+            const { data: savedData, resumeId: loadedId } = await res.json();
+            setInitialData(savedData);
+            setResumeId(loadedId);
+          }
+        } catch (error) {
+          console.error("Failed to load resume:", error);
+        }
+      }
+      setIsInitialLoad(false);
+    };
+    
+    fetchResume();
+  }, []);
 
   const handlePrintTrigger = useReactToPrint({
     contentRef: resumeRef, 

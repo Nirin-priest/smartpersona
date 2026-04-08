@@ -24,49 +24,27 @@ export default async function Dashboard() {
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-gray-50 font-sans p-6">
       <div className="max-w-6xl mx-auto pt-10">
         
-        {/* Header & Search */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
-            วันนี้คุณจะสร้างอะไรดี?
-          </h1>
-          <div className="max-w-2xl mx-auto relative group">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 absolute left-4 top-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input 
-              type="text" 
-              placeholder="ค้นหาเทมเพลตเรซูเม่, พอร์ตโฟลิโอ..." 
-              className="w-full pl-14 pr-6 py-4 rounded-full border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 text-lg transition-all"
-            />
+        {/* Welcome Hero Banner */}
+        <div className="bg-linear-to-r from-[#0066cc] to-[#0052a3] rounded-3xl p-8 md:p-12 text-white shadow-[0_10px_30px_rgba(0,102,204,0.3)] mb-12 flex flex-col md:flex-row items-center justify-between relative overflow-hidden">
+          {/* Abstract Decorations */}
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10"></div>
+          <div className="absolute bottom-0 right-32 -mb-20 w-48 h-48 rounded-full bg-white opacity-5"></div>
+          
+          <div className="relative z-10 text-center md:text-left mb-6 md:mb-0">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
+              สวัสดี, {user?.name || "ผู้ใช้คนเก่ง"} 👋
+            </h1>
+            <p className="text-blue-100 text-lg md:text-xl max-w-xl">
+              ถึงเวลาสร้างและอัปเดตเรซูเม่ของคุณให้โดดเด่น เพื่อให้คุณพร้อมคว้าทุกโอกาสที่เข้ามาแล้ว!
+            </p>
           </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="flex justify-center gap-8 mb-20 flex-wrap">
-          {/* แก้จุดที่ 1 ตรงนี้ครับ */}
-          <Link href="/create/templates" className="flex flex-col items-center group transition-transform hover:-translate-y-1">
-            <div className="w-20 h-20 bg-linear-to-tr from-blue-600 to-blue-400 rounded-2xl flex items-center justify-center text-white shadow-lg mb-3 group-hover:shadow-blue-200">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <span className="text-base font-semibold text-gray-700">สร้างเรซูเม่</span>
-          </Link>
-
-          {/* ปุ่มหลอกอื่นๆ ให้ดูเป็น Dashboard */}
-          {[
-            { name: 'พอร์ตโฟลิโอ', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
-            { name: 'จดหมายสมัครงาน', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' }
-          ].map((item, idx) => (
-            <div key={idx} className="flex flex-col items-center group opacity-60 cursor-not-allowed">
-              <div className="w-20 h-20 bg-white border border-gray-200 rounded-2xl flex items-center justify-center text-gray-400 shadow-sm mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                </svg>
-              </div>
-              <span className="text-base font-medium text-gray-500">{item.name}</span>
-            </div>
-          ))}
+          
+          <div className="relative z-10 flex-shrink-0">
+            <Link href="/create/templates" className="bg-white text-[#0066cc] hover:bg-blue-50 font-bold py-3 px-8 rounded-xl shadow-lg transition-all hover:-translate-y-1 flex items-center gap-2">
+              <Plus size={20} />
+              สร้างเรซูเม่ใหม่
+            </Link>
+          </div>
         </div>
 
         {/* Recent Designs */}

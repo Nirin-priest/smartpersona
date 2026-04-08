@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import UserMenu from "./UserMenu";
+
 export default function CreateNavbar() {
   const router = useRouter();
   const pathname = usePathname();
@@ -43,19 +45,9 @@ export default function CreateNavbar() {
           <span className="text-[#0066cc] font-bold text-lg tracking-wide">Smart Persona</span>
         </Link>
 
-        {/* Right: User name + Logout */}
+        {/* Right: User Menu */}
         <div className="flex items-center gap-4">
-          {userName && (
-            <span className="text-sm font-semibold text-gray-700 hidden sm:block">
-              👋 สวัสดี, {userName}
-            </span>
-          )}
-          <button
-            onClick={handleLogout}
-            className="bg-linear-to-br from-[#0066cc] to-[#0052a3] text-white text-sm font-semibold px-5 py-2 rounded-lg shadow-[0_2px_8px_rgba(0,102,204,0.3)] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,102,204,0.4)] transition-all duration-200"
-          >
-            ออกจากระบบ
-          </button>
+          <UserMenu userName={userName} onLogout={handleLogout} />
         </div>
 
       </div>

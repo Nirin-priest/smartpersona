@@ -17,8 +17,8 @@ export async function POST(request) {
     }
 
     // 3. ดึงข้อมูล User จาก MySQL
-    const sql = "SELECT * FROM users WHERE name = ?";
-    const users = await query(sql, [username]);
+    const sql = "SELECT * FROM users WHERE name = ? OR email = ?";
+    const users = await query(sql, [username, username]);
     const user = users[0];
 
     // 4. ถ้าไม่เจอ User

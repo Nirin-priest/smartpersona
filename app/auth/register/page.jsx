@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -19,6 +20,11 @@ export default function RegisterPage() {
   const validateRegister = () => {
     const e = {};
     if (!username.trim()) e.username = "Please enter a username";
+    if (!email.trim()) {
+      e.email = "Please enter an email address";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      e.email = "Please enter a valid email address";
+    }
     if (!password.trim()) e.password = "Please enter a password";
     if (!confirmPassword.trim())
       e.confirmPassword = "Please confirm your password";
@@ -38,14 +44,14 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     axios
-      .post("/api/users/register", { username, password })
+      .post("/api/users/register", { username, email, password })
       .then(() => {
         alert("Registration successful!");
         router.push("/auth/login");
       })
       .catch((err) => {
         const status = err.response?.status;
-        if (status === 409) setErrors({ username: "Username already exists" });
+        if (status === 409) setErrors({ form: err.response?.data?.message || "Username or email already exists" });
         else setErrors({ form: "Registration failed. Please try again." });
       })
       .finally(() => setIsLoading(false));
@@ -82,6 +88,24 @@ export default function RegisterPage() {
               className={`w-full px-4 py-3 rounded-lg border ${errors.username ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0066cc]'} focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200`}
             />
             {errors.username && <p className="text-red-500 text-sm mt-1.5">{errors.username}</p>}
+          </div>
+
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+            <input
+              type="email"
+              name="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrors((prev) => ({ ...prev, email: "" }));
+              }}
+              disabled={isLoading}
+              placeholder="Enter your email address"
+              className={`w-full px-4 py-3 rounded-lg border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0066cc]'} focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200`}
+            />
+            {errors.email && <p className="text-red-500 text-sm mt-1.5">{errors.email}</p>}
           </div>
 
           <div className="mb-5">

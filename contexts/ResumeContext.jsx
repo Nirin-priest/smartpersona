@@ -22,8 +22,12 @@ export function ResumeProvider({ children }) {
     }));
   };
 
+  const setInitialData = (newData) => {
+    setData(newData);
+  }
+
   return (
-    <ResumeContext.Provider value={{ data, updateData, resumeId, setResumeId }}>
+    <ResumeContext.Provider value={{ data, updateData, setInitialData, resumeId, setResumeId }}>
       {children}
     </ResumeContext.Provider>
   );

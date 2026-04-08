@@ -5,21 +5,27 @@ import { query } from "@/lib/db";
 export async function POST(request) {
   try {
     // ✅ FIX: ไม่รับ roleId จาก client (กำหนด default ที่ server เท่านั้น)
-    const { username, password } = await request.json();
+    const { username, email, password } = await request.json();
 
-    if (!username || !password) {
+    if (!username || !email || !password) {
       return NextResponse.json(
-        { message: "Username and password are required" },
+        { message: "Username, email, and password are required" },
         { status: 400 },
       );
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
     const sql =
-      "INSERT INTO users (name, password, role) VALUES (?, ?, ?)";
+      "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
 
     // ✅ Map username to name column, use built-in 'User' enum role
-    await query(sql, [username, hashPassword, 'User']);
+    const result = await query(sql, [username, email, hashPassword, 'User']);
+    const userId = result.insertId;
+
+    if (userId) {
+      const emailSql = "INSERT INTO user_emails (user_id, email, is_primary) VALUES (?, ?, ?)";
+      await query(emailSql, [userId, email, true]);
+    }
 
     return NextResponse.json({ message: "Success" }, { status: 200 });
   } catch (error) {

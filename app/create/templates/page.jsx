@@ -6,7 +6,7 @@ import { useResume } from "@/contexts/ResumeContext";
 
 export default function TemplatesPage() {
   const router = useRouter();
-  const { updateData } = useResume(); // ดึง updateData มาใช้
+  const { updateData, setResumeId, setInitialData } = useResume(); 
 
   const templates = [
     { id: 'classic', name: 'Classic Professional', desc: 'เรียบหรู ดูเป็นทางการ เหมาะกับองค์กรใหญ่', color: 'bg-gray-800' },
@@ -15,7 +15,21 @@ export default function TemplatesPage() {
 
   // ฟังก์ชันตอนกดเลือกเทมเพลต
   const handleSelectTemplate = (templateId) => {
-    updateData("config", "template", templateId); // 1. จำค่าเทมเพลตที่เลือก
+    // เราต้องเคลียร์ resumeId เพื่อให้ถือเป็นการสร้างใหม่
+    if (setResumeId) setResumeId(null);
+    if (setInitialData) {
+      setInitialData({
+        config: { template: templateId },
+        personal: { firstName: "", lastName: "", email: "", phone: "", address: "", profilePic: "" },
+        education: { degree: "", institution: "", gradYear: "", gpa: "" },
+        experience: { company: "", position: "", details: "" },
+        summary: { details: "" },
+        skills: { list: "" }
+      });
+    } else {
+      updateData("config", "template", templateId); 
+    }
+    
     router.push("/create/personalInfo");          // 2. เด้งไปหน้ากรอกข้อมูล
   };
 

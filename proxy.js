@@ -9,27 +9,37 @@ import { jwtVerify } from "jose";
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
-  // 1. Only apply to /admin, /create, and /api/admin
+  // 1. Only apply to /admin, /create, /api/admin, and /auth
+  const isAuthRoute = pathname.startsWith("/auth/login") || pathname.startsWith("/auth/register");
+  const isApiRoute = pathname.startsWith("/api/admin");
+
   if (
     !pathname.startsWith("/admin") &&
     !pathname.startsWith("/create") &&
-    !pathname.startsWith("/api/admin")
+    !isApiRoute &&
+    !isAuthRoute
   ) {
     return NextResponse.next();
   }
 
-  const isApiRoute = pathname.startsWith("/api/admin");
-
   const cookie = request.cookies.get("token")?.value;
+
+  // --------- จัดการส่วนคนยังไม่ล็อกอิน ---------
   if (!cookie) {
     if (isApiRoute) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    // ถ้าตั้งใจมาหน้า Auth อยู่แล้ว ปล่อยผ่าน
+    if (isAuthRoute) {
+      return NextResponse.next();
+    }
+    // เข้าหน้าอื่นแต่ยังไม่ล็อกอิน ให้ดีดไปหน้า Login
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
+  // --------- จัดการส่วนคนล็อกอินแล้ว ---------
   let payload;
   try {
     // 2. Verify Token using jose (Edge-compatible) instead of API fetch
@@ -41,14 +51,25 @@ export async function proxy(request) {
     if (isApiRoute) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
+    if (isAuthRoute) return NextResponse.next();
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // 3. Admin Route Protection: Must have 'Admin' role
+  const userRole = payload.role?.toLowerCase() || 'user';
+
+  // 3. ถ้าล็อกอินแล้วและจะพยายามเข้าหน้า Auth อีก ให้ดีดกลับไป Dashboard
+  if (isAuthRoute) {
+    if (userRole === "admin") {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    }
+    return NextResponse.redirect(new URL("/create/dashboarduser", request.url));
+  }
+
+  // 4. Admin Route Protection: Must have 'admin' role
   if (pathname.startsWith("/admin") || isApiRoute) {
-    if (payload.role !== "Admin") {
+    if (userRole !== "admin") {
       if (isApiRoute) {
         return NextResponse.json({ error: 'Forbidden: Admins only' }, { status: 403 });
       }
@@ -58,9 +79,9 @@ export async function proxy(request) {
     }
   }
 
-  // 4. Create Route Protection: Admin can't access user side 
+  // 5. Create Route Protection: Admin can't access user side 
   if (pathname.startsWith("/create")) {
-    if (payload.role === "Admin") {
+    if (userRole === "admin") {
       // Redirect Admins to the admin area if they try to access /create
       const adminUrl = new URL("/admin", request.url);
       return NextResponse.redirect(adminUrl);
@@ -71,5 +92,5 @@ export async function proxy(request) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/create/:path*", "/api/admin/:path*"],
+  matcher: ["/admin/:path*", "/create/:path*", "/api/admin/:path*", "/auth/:path*"],
 };

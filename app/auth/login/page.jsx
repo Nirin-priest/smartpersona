@@ -21,7 +21,7 @@ function LoginContent() {
 
   const validateLogin = () => {
     const e = {};
-    if (!username.trim()) e.username = "Please enter your username";
+    if (!username.trim()) e.username = "Please enter your username or email";
     if (!password.trim()) e.password = "Please enter your password";
     return e;
   };
@@ -71,7 +71,7 @@ function LoginContent() {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-5">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Username or Email</label>
             <input
               type="text"
               name="username"
@@ -83,7 +83,7 @@ function LoginContent() {
                 setErrors((prev) => ({ ...prev, username: "" }));
               }}
               disabled={isLoading}
-              placeholder="Enter your username"
+              placeholder="Enter your username or email"
               className={`w-full px-4 py-3 rounded-lg border ${errors.username ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-[#0066cc]'} focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200`}
             />
             {errors.username && <p className="text-red-500 text-sm mt-1.5">{errors.username}</p>}
