@@ -1,8 +1,10 @@
 import { Search, Plus, Edit2, Trash2, AlertCircle, Users } from 'lucide-react';
 import Link from 'next/link';
 import pool from '@/lib/db';
-import { deleteUser } from '../actions';
-import DeleteConfirmForm from '../DeleteConfirmForm';
+import { deleteUser } from '@/app/actions/adminActions';
+import DeleteConfirmForm from '@/components/admin/DeleteConfirmForm';
+
+export const dynamic = 'force-dynamic';
 
 export default async function UsersManagementPage({ searchParams }) {
   const params = await searchParams;

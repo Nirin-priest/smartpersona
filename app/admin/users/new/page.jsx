@@ -1,6 +1,6 @@
 import { ArrowLeft, Save, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
-import { createUser } from '../../actions';
+import { createUser } from '@/app/actions/adminActions';
 
 export default function NewUserPage() {
   return (

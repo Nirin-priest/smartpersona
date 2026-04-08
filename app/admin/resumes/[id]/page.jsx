@@ -1,8 +1,8 @@
 import { ArrowLeft, FileText, User as UserIcon, Calendar, Activity, Download, Trash2, Eye, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import pool from '@/lib/db';
-import DeleteConfirmForm from '../../DeleteConfirmForm';
-import { deleteResume } from '../../actions';
+import DeleteConfirmForm from '@/components/admin/DeleteConfirmForm';
+import { deleteResume } from '@/app/actions/adminActions';
 import ResumeDetailClient from './ResumeDetailClient';
 
 import { Suspense } from 'react';

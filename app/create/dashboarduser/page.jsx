@@ -1,8 +1,27 @@
 import Link from "next/link";
+import { getCurrentUser } from "@/lib/session";
+import pool from "@/lib/db";
+import { FileText, Clock, ChevronRight, Plus } from "lucide-react";
 
-export default function Dashboard() {
+export const dynamic = "force-dynamic";
+
+export default async function Dashboard() {
+  const user = await getCurrentUser();
+  let resumes = [];
+
+  if (user) {
+    try {
+      const [rows] = await pool.query(
+        "SELECT id, title, template, created_at FROM resumes WHERE user_id = ? ORDER BY created_at DESC",
+        [user.id]
+      );
+      resumes = rows;
+    } catch (error) {
+      console.error("Dashboard data fetch error:", error);
+    }
+  }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 font-sans p-6">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-gray-50 font-sans p-6">
       <div className="max-w-6xl mx-auto pt-10">
         
         {/* Header & Search */}
@@ -26,7 +45,7 @@ export default function Dashboard() {
         <div className="flex justify-center gap-8 mb-20 flex-wrap">
           {/* แก้จุดที่ 1 ตรงนี้ครับ */}
           <Link href="/create/templates" className="flex flex-col items-center group transition-transform hover:-translate-y-1">
-            <div className="w-20 h-20 bg-gradient-to-tr from-blue-600 to-blue-400 rounded-2xl flex items-center justify-center text-white shadow-lg mb-3 group-hover:shadow-blue-200">
+            <div className="w-20 h-20 bg-linear-to-tr from-blue-600 to-blue-400 rounded-2xl flex items-center justify-center text-white shadow-lg mb-3 group-hover:shadow-blue-200">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -52,15 +71,43 @@ export default function Dashboard() {
 
         {/* Recent Designs */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">ดีไซน์ล่าสุดของคุณ</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <Clock size={24} className="text-blue-500" />
+            ดีไซน์ล่าสุดของคุณ
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* แก้จุดที่ 2 ตรงนี้ครับ */}
-            <Link href="/create/templates" className="bg-white border-2 border-dashed border-gray-300 rounded-2xl h-56 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 mb-3 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+            <Link href="/create/templates" className="bg-white border-2 border-dashed border-gray-200 rounded-2xl h-64 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group shadow-sm">
+              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 mb-3 group-hover:bg-blue-100 transition-colors">
+                <Plus size={24} />
               </div>
               <span className="text-sm font-semibold text-gray-600">สร้างใหม่</span>
             </Link>
+
+            {resumes.map((resume) => (
+              <Link 
+                key={resume.id} 
+                href={`/create/personalInfo?resumeId=${resume.id}`}
+                className="bg-white border border-gray-100 rounded-2xl h-64 overflow-hidden flex flex-col cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all group relative border-b-4 border-b-blue-500"
+              >
+                <div className="flex-1 bg-gray-50 flex items-center justify-center p-6 relative">
+                   <div className="w-24 h-32 bg-white shadow-md rounded border border-gray-100 flex flex-col p-2 gap-1 overflow-hidden group-hover:scale-105 transition-transform">
+                      <div className="h-2 w-full bg-gray-100 rounded"></div>
+                      <div className="h-1 w-2/3 bg-gray-50 rounded"></div>
+                      <div className="h-1 w-full bg-gray-50 rounded mt-2"></div>
+                      <div className="h-1 w-full bg-gray-50 rounded"></div>
+                      <div className="h-1 w-full bg-gray-50 rounded"></div>
+                   </div>
+                   <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/5 transition-colors"></div>
+                </div>
+                <div className="p-4 bg-white border-t border-gray-50">
+                  <h3 className="font-bold text-gray-800 text-sm mb-1 truncate">{resume.title || "Untitled Resume"}</h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{resume.template}</span>
+                    <ChevronRight size={14} className="text-gray-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
 

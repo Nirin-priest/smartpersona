@@ -2,14 +2,15 @@
 import { useRef, useState, useEffect } from "react";
 import { useReactToPrint } from "react-to-print";
 import Link from "next/link";
-import { useResume } from "../ResumeContext"; 
-import ResumePreview from "../ResumePreview";
-import { incrementResumeView, incrementResumeDownload } from "@/app/admin/actions";
+import { useResume } from "@/contexts/ResumeContext"; 
+import ResumePreview from "@/components/create/ResumePreview";
+import { incrementResumeView, incrementResumeDownload } from "@/app/actions/adminActions";
 
 export default function ResumeBuilder() {
-  const { data, updateData, resumeId, setResumeId } = useResume(); 
+  const { data, updateData, resumeId, setResumeId } = useResume();
   const resumeRef = useRef(null);
-  const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | saved | error
+  const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | saved | error
+  const [uploadStatus, setUploadStatus] = useState('idle'); // idle | uploading | done | error
 
   const handlePrintTrigger = useReactToPrint({
     contentRef: resumeRef, 
@@ -30,14 +31,33 @@ export default function ResumeBuilder() {
     }
   }, [resumeId]);
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        updateData("personal", "profilePic", reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    setUploadStatus('uploading');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.message || 'อัปโหลดรูปไม่สำเร็จ');
+        setUploadStatus('error');
+        return;
+      }
+
+      const { url } = await res.json();
+      updateData('personal', 'profilePic', url);
+      setUploadStatus('done');
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setUploadStatus('error');
     }
   };
 
@@ -119,8 +139,11 @@ export default function ResumeBuilder() {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">รูปโปรไฟล์</label>
-                <input type="file" accept="image/*" className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                <input type="file" accept="image/*" disabled={uploadStatus === 'uploading'} className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-60"
                   onChange={handleImageUpload} />
+                {uploadStatus === 'uploading' && <p className="text-xs text-blue-500 mt-1">⏳ กำลังอัปโหลดรูป...</p>}
+                {uploadStatus === 'done' && <p className="text-xs text-green-600 mt-1">✅ อัปโหลดรูปสำเร็จ</p>}
+                {uploadStatus === 'error' && <p className="text-xs text-red-500 mt-1">❌ อัปโหลดรูปไม่สำเร็จ กรุณาลองใหม่</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">อีเมล</label>

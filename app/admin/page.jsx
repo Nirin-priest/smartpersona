@@ -1,6 +1,9 @@
 import { Users, FileText, Activity, TrendingUp, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import pool from '@/lib/db';
+import LiveStats from '@/components/admin/LiveStats';
+
+export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboard() {
   let dbConnected = false;
@@ -12,45 +15,44 @@ export default async function AdminDashboard() {
   let dbError = null;
 
   try {
-    const [userRows] = await pool.query('SELECT COUNT(*) as count FROM users');
+    // รัน queries พร้อมกันด้วย Promise.all แทนที่จะรอทีละ query
+    const [
+      [userRows],
+      [resumeRows],
+      [activeRows],
+      [usersWithResumesRows],
+      [recent],
+    ] = await Promise.all([
+      pool.query('SELECT COUNT(*) as count FROM users'),
+      pool.query('SELECT COUNT(*) as count FROM resumes'),
+      pool.query('SELECT COUNT(*) as count FROM users WHERE created_at >= NOW() - INTERVAL 1 DAY'),
+      pool.query('SELECT COUNT(DISTINCT user_id) as count FROM resumes'),
+      pool.query('SELECT id, name, email, status, created_at as date FROM users ORDER BY created_at DESC LIMIT 5'),
+    ]);
+
     totalUsers = userRows[0].count;
-
-    const [resumeRows] = await pool.query('SELECT COUNT(*) as count FROM resumes');
     totalResumes = resumeRows[0].count;
-
-    const [activeRows] = await pool.query(
-      'SELECT COUNT(*) as count FROM users WHERE created_at >= NOW() - INTERVAL 1 DAY'
-    );
     activeUsers24h = activeRows[0].count;
-
-    const [usersWithResumesRows] = await pool.query(
-      'SELECT COUNT(DISTINCT user_id) as count FROM resumes'
-    );
     const usersWithResumes = usersWithResumesRows[0].count;
     conversionRate =
       totalUsers > 0
         ? ((usersWithResumes / totalUsers) * 100).toFixed(1) + '%'
         : '0.0%';
-
-    const [recent] = await pool.query(
-      'SELECT id, name, email, status, created_at as date FROM users ORDER BY created_at DESC LIMIT 5'
-    );
     recentUsers = recent.map((user) => ({
       ...user,
       date: new Date(user.date).toLocaleDateString('th-TH'),
     }));
-
     dbConnected = true;
   } catch (err) {
     dbError = err.message;
   }
 
-  const stats = [
-    { name: 'Total Users', value: totalUsers.toLocaleString(), icon: Users },
-    { name: 'Total Resumes', value: totalResumes.toLocaleString(), icon: FileText },
-    { name: 'Active Users (24h)', value: activeUsers24h.toLocaleString(), icon: Activity },
-    { name: 'Conversion Rate', value: conversionRate, icon: TrendingUp },
-  ];
+  const initialStats = {
+    totalUsers,
+    totalResumes,
+    activeUsers24h,
+    conversionRate
+  };
 
   return (
     <div className="space-y-6">
@@ -79,31 +81,8 @@ export default async function AdminDashboard() {
         </a>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.name}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between group hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="bg-blue-50 p-3 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                  <Icon size={24} />
-                </div>
-                <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">
-                  Live
-                </span>
-              </div>
-              <div>
-                <h3 className="text-gray-500 text-sm font-medium mb-1">{stat.name}</h3>
-                <p className="text-3xl font-bold text-gray-800">{stat.value}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* Stats Grid - Now Live! */}
+      <LiveStats initialStats={initialStats} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
         {/* Recent Registrations Table */}

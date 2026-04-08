@@ -1,4 +1,5 @@
-import { getSettings, updateSettings } from '../../actions';
+import pool from '@/lib/db';
+import { getSettings, updateSettings } from '@/app/actions/adminActions';
 import { NextResponse } from 'next/server';
 
 /**

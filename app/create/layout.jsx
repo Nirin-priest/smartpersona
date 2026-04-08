@@ -1,6 +1,6 @@
 "use client";
-import { ResumeProvider } from "./ResumeContext";
-import CreateNavbar from "./CreateNavbar";
+import { ResumeProvider } from "@/contexts/ResumeContext";
+import CreateNavbar from "@/components/create/CreateNavbar";
 
 export default function CreateLayout({ children }) {
   return (
