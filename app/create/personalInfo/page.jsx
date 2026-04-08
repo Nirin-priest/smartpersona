@@ -135,13 +135,7 @@ export default function ResumeBuilder() {
   return (
     <div className="min-h-screen bg-gray-100 p-4 lg:p-8 font-sans">
       <div className="max-w-7xl mx-auto">
-        {/* ปุ่มย้อนกลับ */}
-        <Link href="/create/templates" className="inline-flex items-center text-gray-500 hover:text-blue-600 mb-6 font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-          </svg>
-          ย้อนกลับไปเลือกเทมเพลต
-        </Link>
+
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         

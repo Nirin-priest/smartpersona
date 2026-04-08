@@ -14,8 +14,7 @@ export default function ProfileSettingsModal({ isOpen, onClose, onProfileUpdate 
   const fileInputRef = useRef(null);
 
   // Email state
-  const [emails, setEmails] = useState([]);
-  const [newEmail, setNewEmail] = useState("");
+  const [currentEmail, setCurrentEmail] = useState("");
 
   // Security state
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
@@ -34,7 +33,9 @@ export default function ProfileSettingsModal({ isOpen, onClose, onProfileUpdate 
         profile_pic: res.data.user.profile_pic || ""
       });
       setPreviewPic(res.data.user.profile_pic || "");
-      setEmails(res.data.emails || []);
+      const emailsArr = res.data.emails || [];
+      const primary = emailsArr.find(e => e.is_primary) || emailsArr[0] || {};
+      setCurrentEmail(primary.email || res.data.user.email || "");
     } catch (e) {
       console.error(e);
     }
@@ -73,31 +74,15 @@ export default function ProfileSettingsModal({ isOpen, onClose, onProfileUpdate 
     }
   };
 
-  const handleAddEmail = async (e) => {
+  const handleChangeEmail = async (e) => {
     e.preventDefault();
-    if (!newEmail.trim()) return;
+    if (!currentEmail.trim()) return;
     setIsLoading(true);
     try {
-      await axios.post("/api/users/emails", { email: newEmail });
-      setNewEmail("");
+      await axios.patch("/api/users/emails", { email: currentEmail });
       fetchProfileData();
       if (onProfileUpdate) onProfileUpdate();
-      parseMessage("เพิ่มอีเมลเรียบร้อยแล้ว", "success");
-    } catch (err) {
-      parseMessage(err.response?.data?.message || "เกิดข้อผิดพลาด", "error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleRemoveEmail = async (id) => {
-    if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบอีเมลนี้?")) return;
-    setIsLoading(true);
-    try {
-      await axios.delete(`/api/users/emails?id=${id}`);
-      fetchProfileData();
-      if (onProfileUpdate) onProfileUpdate();
-      parseMessage("ลบอีเมลเรียบร้อยแล้ว", "success");
+      parseMessage("แก้ไขอีเมลเรียบร้อยแล้ว", "success");
     } catch (err) {
       parseMessage(err.response?.data?.message || "เกิดข้อผิดพลาด", "error");
     } finally {
@@ -241,58 +226,27 @@ export default function ProfileSettingsModal({ isOpen, onClose, onProfileUpdate 
 
             {activeTab === "emails" && (
               <div className="animate-in fade-in duration-300">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">อีเมลของคุณ</h3>
-                <p className="text-sm text-gray-500 mb-6">คุณสามารถเพิ่มอีเมลได้หลายรายการเพื่อใช้สำหรับการติดต่อ</p>
-                
-                <div className="space-y-3 mb-8">
-                  {emails.map((emailObj) => (
-                    <div key={emailObj.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50/50">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900 text-sm">{emailObj.email}</p>
-                          {emailObj.is_primary && (
-                            <span className="inline-flex items-center px-2 py-0.5 mt-1 rounded text-[10px] font-bold bg-green-100 text-green-700">หลัก</span>
-                          )}
-                        </div>
-                      </div>
-                      {!emailObj.is_primary && (
-                        <button 
-                          onClick={() => handleRemoveEmail(emailObj.id)}
-                          disabled={isLoading}
-                          className="p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors focus:outline-none"
-                          title="ลบอีเมล"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                <form onSubmit={handleAddEmail} className="bg-gray-50 border border-gray-100 p-5 rounded-xl">
-                  <h4 className="font-semibold text-gray-800 text-sm mb-3">เพิ่มอีเมลใหม่</h4>
-                  <div className="flex flex-col sm:flex-row gap-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">อีเมลของคุณ</h3>
+                <form onSubmit={handleChangeEmail} className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">อีเมลที่ใช้ติดต่อ</label>
                     <input 
                       type="email" 
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value)}
+                      value={currentEmail}
+                      onChange={(e) => setCurrentEmail(e.target.value)}
                       placeholder="กรอกอีเมลของคุณ" 
-                      className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       required
                     />
+                    <p className="mt-2 text-xs text-gray-500">อีเมลนี้จะถูกใช้เพื่อยืนยันตัวตนและการแจ้งเตือนต่างๆ ในระบบ</p>
+                  </div>
+                  <div className="pt-4 border-t border-gray-100">
                     <button 
                       type="submit" 
-                      disabled={isLoading || !newEmail}
-                      className="bg-gray-900 hover:bg-black disabled:bg-gray-300 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap"
+                      disabled={isLoading || !currentEmail}
+                      className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-sm"
                     >
-                      บันทึกรายการ
+                      {isLoading ? "กำลังบันทึก..." : "อัปเดตอีเมล"}
                     </button>
                   </div>
                 </form>

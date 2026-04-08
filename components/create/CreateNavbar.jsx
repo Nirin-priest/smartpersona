@@ -12,9 +12,10 @@ export default function CreateNavbar() {
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
-    fetch("/api/auth/verify")
+    // ดึงชื่อสดจาก DB (เหมือนกับ Dashboard) แทนการอ่านจาก JWT ที่อาจ stale
+    fetch("/api/users/profile")
       .then((r) => r.json())
-      .then((d) => setUserName(d.name || ""))
+      .then((d) => setUserName(d.user?.name || ""))
       .catch(() => {});
   }, []);
 
@@ -42,8 +43,34 @@ export default function CreateNavbar() {
           <div className="w-9 h-9 rounded-lg bg-linear-to-br from-[#0066cc] to-[#0052a3] flex items-center justify-center text-white font-bold text-base shadow-[0_2px_8px_rgba(0,102,204,0.3)]">
             S
           </div>
-          <span className="text-[#0066cc] font-bold text-lg tracking-wide">Smart Persona</span>
+          <span className="text-[#0066cc] font-bold text-lg tracking-wide hidden sm:block">Smart Persona</span>
         </Link>
+
+        {/* Center: Step Navigation */}
+        <div className="hidden md:flex items-center gap-1 bg-gray-50/80 px-2 py-1.5 rounded-xl border border-gray-100">
+          {navItems.map((item, idx) => {
+            const isActive = pathname === item.href;
+            return (
+              <div key={item.href} className="flex items-center">
+                <Link
+                  href={item.href}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                    isActive
+                      ? "bg-white text-[#0066cc] shadow-sm ring-1 ring-gray-100"
+                      : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+                {idx < navItems.length - 1 && (
+                  <svg className="w-4 h-4 mx-1 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
         {/* Right: User Menu */}
         <div className="flex items-center gap-4">
