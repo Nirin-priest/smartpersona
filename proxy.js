@@ -58,7 +58,7 @@ export async function proxy(request) {
     }
   }
 
-  // 4. Create Route Protection: Admin can't access user side
+  // 4. Create Route Protection: Admin can't access user side 
   if (pathname.startsWith("/create")) {
     if (payload.role === "Admin") {
       // Redirect Admins to the admin area if they try to access /create
