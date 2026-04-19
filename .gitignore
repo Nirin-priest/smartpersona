@@ -45,3 +45,10 @@ mysql-data/
 
 # user uploaded images
 /public/uploads/
+
+# local database backups
+/backups/
+
+# test and scratch scripts
+test_*.js
+check_db.js

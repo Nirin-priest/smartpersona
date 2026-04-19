@@ -31,6 +31,9 @@ export async function GET(request) {
 
     const row = results[0];
     
+    // ✅ Increment view count every time the resume is loaded
+    await query("UPDATE resumes SET views = views + 1 WHERE id = ?", [resumeId]);
+
     // Parse JSON strings to objects
     const data = {
       config: typeof row.config === 'string' ? JSON.parse(row.config) : row.config || { template: row.template || "classic" },

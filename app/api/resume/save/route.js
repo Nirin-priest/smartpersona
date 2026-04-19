@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { query } from "@/lib/db";
 import { v4 as uuidv4 } from "uuid";
+import { addNotification } from "@/app/admin/actions/notificationActions";
 
 // ฟังก์ชันดึง user_id จาก JWT cookie
 function getUserIdFromRequest(request) {
@@ -77,6 +78,9 @@ export async function POST(request) {
           JSON.stringify(skills),
         ]
       );
+
+      // ✅ Trigger Admin Notification
+      await addNotification(`มีการสร้างเรซูเม่ใหม่: ${title}`, "resume", `/admin/resumes/${newId}`);
 
       return NextResponse.json(
         { message: "Created", resumeId: newId },
